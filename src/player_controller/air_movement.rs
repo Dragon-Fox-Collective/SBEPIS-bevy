@@ -1,11 +1,14 @@
 use bevy::prelude::*;
 use bevy_xpbd_3d::prelude::*;
 
-use super::{PlayerBody, football::PlayerSpeed};
+use crate::with_only;
+
+use super::PlayerBody;
+use super::football::PlayerSpeed;
 
 pub fn air_strafe(
 	In(velocity): In<Vec2>,
-	mut player_body: Query<(&mut Position, &Rotation), With<PlayerBody>>,
+	mut player_body: Query<(&mut Position, &Rotation), with_only![PlayerBody]>,
 	time: Res<Time>,
 )
 {

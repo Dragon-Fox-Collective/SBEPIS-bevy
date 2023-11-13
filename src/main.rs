@@ -144,3 +144,16 @@ fn quit(
 {
 	ev_quit.send(bevy::app::AppExit);
 }
+
+#[macro_export]
+macro_rules! with_only {
+	($ty:ty) => {with_only!($ty, (
+		crate::player_controller::Hand,
+		crate::player_controller::PlayerBody,
+		crate::player_controller::Football,
+	))};
+
+	($x:ty, ($($y:ty), +, $(,)?)) => {(
+		$(sbepis_macros::eq_tern!($x, $y, With<$y>, Without<$y>), )+
+	)}
+}

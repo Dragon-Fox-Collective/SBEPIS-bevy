@@ -2,13 +2,17 @@ mod football;
 mod orientation;
 mod camera_controls;
 mod air_movement;
+mod hand;
 
 use self::football::*;
 use self::orientation::*;
 use self::camera_controls::*;
 use self::air_movement::*;
+use self::hand::*;
 
 pub use self::camera_controls::{PlayerCamera, PlayerBody, MouseSensitivity};
+pub use self::hand::Hand;
+pub use self::football::Football;
 
 use bevy::prelude::*;
 use bevy_xpbd_3d::math::PI;
@@ -54,6 +58,7 @@ impl Plugin for PlayerControllerPlugin
 				button_input(MovementAction::Jump).pipe(jump),
 				clamped_dual_axes_input(MovementAction::Move).pipe(axes_to_ground_velocity).pipe(spin_football).after(orient),
 				clamped_dual_axes_input(MovementAction::Move).pipe(axes_to_air_acceleration).pipe(air_strafe).run_if(not(is_football_on_ground)).after(spin_football),
+				move_hand_to_position.after(orient),
 			).in_set(SubstepSet::SolveUserConstraints));
 	}
 }
@@ -128,6 +133,16 @@ fn setup(
 		PlayerCamera,
 		Pitch(0.0),
 	)).set_parent(body);
+
+	commands.spawn((
+		Name::new("Player Hand"),
+		Hand,
+		PbrBundle {
+			mesh: meshes.add(Mesh::from(shape::Cube { size: 0.1 })),
+			..default()
+		},
+		Collider::cuboid(0.1, 0.1, 0.1),
+	));
 }
 
 #[derive(Actionlike, Clone, Copy, Reflect)]
