@@ -25,7 +25,6 @@ image = "0.24.7"
 itertools = "0.11.0"
 leafwing-input-manager = { version = "0.11.1", git = "https://github.com/Leafwing-Studios/leafwing-input-manager.git", rev = "42b0b21" }
 num-traits = "0.2.17"
-sbepis-macros = { path = "./sbepis_macros", version = "0.1.0" }
 winit = "0.28.7"
 
 [build-dependencies]

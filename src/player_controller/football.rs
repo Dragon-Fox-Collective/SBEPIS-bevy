@@ -1,8 +1,6 @@
 use bevy::prelude::*;
 use bevy_xpbd_3d::prelude::*;
 
-use crate::with_only;
-
 use super::PlayerBody;
 
 #[derive(Component)]
@@ -38,8 +36,8 @@ pub fn axes_to_ground_velocity(
 
 pub fn spin_football(
 	In(input_velocity): In<Vec2>,
-	mut football: Query<(&mut Rotation, &PreviousRotation, &Football), with_only![Football]>,
-	player_body: Query<&Rotation, with_only![PlayerBody]>,
+	mut football: Query<(&mut Rotation, &PreviousRotation, &Football), Without<PlayerBody>>,
+	player_body: Query<&Rotation, With<PlayerBody>>,
 	time: Res<Time>,
 )
 {
