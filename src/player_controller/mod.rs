@@ -2,11 +2,13 @@ mod football;
 mod orientation;
 mod camera_controls;
 mod air_movement;
+mod hand;
 
 use self::football::*;
 use self::orientation::*;
 use self::camera_controls::*;
 use self::air_movement::*;
+use self::hand::*;
 
 pub use self::camera_controls::{PlayerCamera, PlayerBody, MouseSensitivity};
 
@@ -50,10 +52,13 @@ impl Plugin for PlayerControllerPlugin
 		app.get_schedule_mut(SubstepSchedule)
 			.expect("add SubstepSchedule first")
 			.add_systems((
-				orient.after(apply_gravity),
 				button_input(MovementAction::Jump).pipe(jump),
-				clamped_dual_axes_input(MovementAction::Move).pipe(axes_to_ground_velocity).pipe(spin_football).after(orient),
-				clamped_dual_axes_input(MovementAction::Move).pipe(axes_to_air_acceleration).pipe(air_strafe).run_if(not(is_football_on_ground)).after(spin_football),
+				//move_hand_to_position,
+				(
+					orient.after(apply_gravity),
+					clamped_dual_axes_input(MovementAction::Move).pipe(axes_to_ground_velocity).pipe(spin_football),
+					clamped_dual_axes_input(MovementAction::Move).pipe(axes_to_air_acceleration).pipe(air_strafe).run_if(not(is_football_on_ground)),
+				).chain(), // There aren't archetype invariants yet so everything that modifies Position/Rotation *has* to be chained regardless of filters
 			).in_set(SubstepSet::SolveUserConstraints));
 	}
 }
@@ -128,6 +133,25 @@ fn setup(
 		PlayerCamera,
 		Pitch(0.0),
 	)).set_parent(body);
+
+	let hand = commands.spawn((
+		Name::new("Player Hand"),
+		Hand,
+		PbrBundle {
+			mesh: meshes.add(Mesh::from(shape::Cube { size: 0.1 })),
+			material: gridbox_material("grey3", &mut materials, &asset_server),
+			..default()
+		},
+		Collider::cuboid(0.1, 0.1, 0.1),
+		GravityRigidbodyBundle::default(),
+		Position(Vec3::Y * 2.),
+	)).id();
+
+	commands.spawn((
+		Name::new("Hand Joint"),
+		FixedJoint::new(body, hand).with_local_anchor_1(Vec3::X * 1.),
+		HandJoint,
+	));
 }
 
 #[derive(Actionlike, Clone, Copy, Reflect)]

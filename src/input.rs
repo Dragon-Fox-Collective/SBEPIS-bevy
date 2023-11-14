@@ -9,10 +9,13 @@ pub fn spawn_input_manager<Action: Actionlike>(
 		mut commands: Commands,
 	|
 	{
-		commands.spawn(InputManagerBundle::<Action> {
-			input_map: input_map.clone(),
-			..default()
-		});
+		commands.spawn((
+			Name::new("Input Manager"),
+			InputManagerBundle::<Action> {
+				input_map: input_map.clone(),
+				..default()
+			}
+		));
 	}).into_configs()
 }
 
