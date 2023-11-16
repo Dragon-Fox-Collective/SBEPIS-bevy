@@ -105,12 +105,24 @@ fn setup(
 	let gray_material = gridbox_material("grey2", &mut materials, &asset_server);
 	let green_material = gridbox_material("green1", &mut materials, &asset_server);
 
-	commands.spawn((Name::new("Planet"), PlanetBundle::new(Vec3::Y * -1000.0, 1000.0, 10.0, &mut meshes, gray_material)));
+	commands.spawn((Name::new("Planet"), PlanetBundle::new(Vec3::Y * -1000.0, 1000.0, 10.0, &mut meshes, gray_material.clone())));
 
 	let cube_mesh = meshes.add(Mesh::from(shape::Cube { size: 1.0 }));
 	commands.spawn((Name::new("Cube 1"), BoxBundle::new(Vec3::new(0.0, 4.0, 0.0), cube_mesh.clone(), green_material.clone())));
 	commands.spawn((Name::new("Cube 2"), BoxBundle::new(Vec3::new(0.5, 5.5, 0.0), cube_mesh.clone(), green_material.clone())));
 	commands.spawn((Name::new("Cube 3"), BoxBundle::new(Vec3::new(-0.5, 7.0, 0.0), cube_mesh.clone(), green_material.clone())));
+	
+	commands.spawn((
+		Name::new("Pillar"),
+		PbrBundle {
+			transform: Transform::from_translation(Vec3::new(-4.0, 1.0, 0.0)),
+			mesh: meshes.add(Mesh::from(shape::Box::new(1., 2., 1.))),
+			material: gray_material.clone(),
+			..default()
+		},
+		Collider::cuboid(1., 2., 1.),
+		RigidBody::Static,
+	));
 
 	commands.spawn((
 		Name::new("Sun"),

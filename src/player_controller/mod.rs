@@ -52,14 +52,17 @@ impl Plugin for PlayerControllerPlugin
 		app.get_schedule_mut(SubstepSchedule)
 			.expect("add SubstepSchedule first")
 			.add_systems((
-				button_input(MovementAction::Jump).pipe(jump),
-				//move_hand_to_position,
 				(
-					orient.after(apply_gravity),
-					clamped_dual_axes_input(MovementAction::Move).pipe(axes_to_ground_velocity).pipe(spin_football),
-					clamped_dual_axes_input(MovementAction::Move).pipe(axes_to_air_acceleration).pipe(air_strafe).run_if(not(is_football_on_ground)),
-				).chain(), // There aren't archetype invariants yet so everything that modifies Position/Rotation *has* to be chained regardless of filters
-			).in_set(SubstepSet::SolveUserConstraints));
+					button_input(MovementAction::Jump).pipe(jump),
+					//move_hand_to_position,
+					(
+						orient.after(apply_gravity),
+						clamped_dual_axes_input(MovementAction::Move).pipe(axes_to_ground_velocity).pipe(spin_football),
+						clamped_dual_axes_input(MovementAction::Move).pipe(axes_to_air_acceleration).pipe(air_strafe).run_if(not(is_football_on_ground)),
+					).chain(), // There aren't archetype invariants yet so everything that modifies Position/Rotation *has* to be chained regardless of filters
+				).in_set(SubstepSet::SolveUserConstraints),
+				hold_body_yaw.after(SubstepSet::SolveVelocities),
+			));
 	}
 }
 
@@ -87,6 +90,7 @@ fn setup(
 		PlayerBody,
 		Rotation::default(),
 		AngularVelocity::default(),
+		SleepingDisabled,
 	)).id();
 
 	let football = commands.spawn((
@@ -102,6 +106,7 @@ fn setup(
 		Collider::ball(0.5),
 		AngularVelocity::default(),
 		Friction::new(100.0).with_combine_rule(CoefficientCombine::Multiply),
+		SleepingDisabled,
 	)).id();
 
 	commands.spawn((
@@ -145,6 +150,7 @@ fn setup(
 		Collider::cuboid(0.1, 0.1, 0.1),
 		GravityRigidbodyBundle::default(),
 		Position(Vec3::Y * 2.),
+		SleepingDisabled,
 	)).id();
 
 	commands.spawn((

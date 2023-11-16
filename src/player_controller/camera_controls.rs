@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy_xpbd_3d::{prelude::{Rotation, AngularVelocity}, math::PI};
+use bevy_xpbd_3d::{prelude::*, math::PI};
 
 #[derive(Component)]
 pub struct PlayerCamera;
@@ -21,6 +21,7 @@ pub fn rotate_camera_and_body(
 	mut player_body: Query<(&mut Rotation, &mut AngularVelocity), With<PlayerBody>>,
 )
 {
+	// Pitch
 	{
 		let (mut camera_transform, mut camera_pitch, camera) = player_camera.single_mut();
 		if !camera.is_active { return; }
@@ -30,6 +31,7 @@ pub fn rotate_camera_and_body(
 		camera_transform.rotation = Quat::from_rotation_x(-camera_pitch.0);
 	}
 
+	// Yaw
 	{
 		let (mut body_rotation, mut body_angular_velocity) = player_body.single_mut();
 
@@ -37,6 +39,15 @@ pub fn rotate_camera_and_body(
 
 		// Football imparts torque on body and LockedAxes doesn't work
 		// reject_from is projection on the plane normal to the vec
-		body_angular_velocity.0 = body_angular_velocity.0.reject_from(body_rotation.0 * Vec3::Y);
+		//body_angular_velocity.0 = body_angular_velocity.0.reject_from(body_rotation.0 * Vec3::Y);
 	}
+}
+
+pub fn hold_body_yaw(
+	mut player_body: Query<(&mut Rotation, &PreviousRotation, &mut AngularVelocity), With<PlayerBody>>
+)
+{
+	let (mut rotation, previous_rotation, mut angular_velocity) = player_body.single_mut();
+	//rotation.0 = previous_rotation.0.0;
+	angular_velocity.0 = Vec3::ZERO;
 }
